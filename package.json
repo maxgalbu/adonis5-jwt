@@ -1,0 +1,75 @@
+{
+  "name": "adonis-jwt",
+  "version": "1.0.0",
+  "description": "",
+  "types": "build/adonis-typings/index.d.ts",
+  "main": "build/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "pretest": "npm run lint",
+    "test": "node japaFile.js",
+    "mrm": "mrm --preset=@adonisjs/mrm-preset",
+    "clean": "del build",
+    "compile": "npm run lint && npm run clean && tsc",
+    "build": "npm run compile",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint . --ext=.ts",
+    "format": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git"
+  },
+  "author": "Max Galbusera",
+  "license": "MIT",
+  "keywords": [
+    "adonis",
+    "adonis-auth",
+    "authentication",
+    "jwt"
+  ],
+  "devDependencies": {
+    "@adonisjs/mrm-preset": "^4.1.2",
+    "@adonisjs/require-ts": "^2.0.8",
+    "@types/node": "^16.10.3",
+    "del-cli": "^4.0.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-adonis": "^1.3.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "japa": "^3.1.1",
+    "mrm": "^3.0.9",
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.3"
+  },
+  "files": [
+    "build/adonis-typings",
+    "build/providers",
+    "build/lib",
+    "build/index.d.ts",
+    "build/index.js"
+  ],
+  "dependencies": {
+    "@adonisjs/auth": "^8.0.9",
+    "@adonisjs/core": "^5.3.4",
+    "@adonisjs/lucid": "^16.2.1",
+    "jose": "^3.20.0"
+  },
+  "adonisjs": {
+    "types": "jwt-auth",
+    "providers": [
+      "jwt"
+    ],
+    "templates": {
+      "basePath": "./build/templates",
+      "config": [
+        {
+          "src": "config.txt",
+          "dest": "sentry"
+        }
+      ]
+    }
+  }
+}

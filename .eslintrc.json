@@ -1,0 +1,17 @@
+{
+    "extends": [
+        "plugin:adonis/typescriptPackage",
+        "prettier"
+    ],
+    "rules": {
+        "max-len": "off",
+        "@typescript-eslint/indent": ["error", 4, {
+            "SwitchCase": 1,
+            "flatTernaryExpressions": false,
+            "ignoredNodes": ["TSTypeParameterInstantiation"]
+        }],
+        "@typescript-eslint/space-before-function-paren": ["error", "never"],
+        "@typescript-eslint/semi": "off",
+        "@typescript-eslint/quotes": "off"
+    }
+}
