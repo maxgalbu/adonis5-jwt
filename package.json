@@ -56,7 +56,7 @@
     "build/adonis-typings",
     "build/providers",
     "build/lib",
-    "build/instructions.md",
+    "build/instructions.md"
   ],
   "dependencies": {
     "jose": "^3.20.0"
