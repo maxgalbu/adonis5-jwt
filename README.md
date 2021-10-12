@@ -14,7 +14,13 @@ npm install adonis5-jwt
 yarn add adonis5-jwt
 ```
 
-Edit `contracts/auth.ts` like this:
+After the package has been installed, you have to configure it by running a command:
+
+```js
+node ace configure adonis5-jwt
+```
+
+Then, edit `contracts/auth.ts` like this:
 
 ```ts
 //Add the following line

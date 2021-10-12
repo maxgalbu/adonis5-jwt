@@ -1,6 +1,12 @@
 ## The package has been installed & configured successfully
 
-Edit `contracts/auth.ts` like this:
+Now you have to configure it by running a command:
+
+```js
+node ace configure adonis5-jwt
+```
+
+Then, edit `contracts/auth.ts` like this:
 
 ```ts
 //Add the following line
