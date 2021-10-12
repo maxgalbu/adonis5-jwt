@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "types": "build/adonis-typings/index.d.ts",
-  "main": "build/index.js",
+  "main": "build/providers/JwtProvider.js",
   "directories": {
     "lib": "lib"
   },
