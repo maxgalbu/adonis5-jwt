@@ -56,14 +56,12 @@
     "build/adonis-typings",
     "build/providers",
     "build/lib",
-    "build/index.d.ts",
-    "build/index.js"
+    "build/instructions.md",
   ],
   "dependencies": {
     "jose": "^3.20.0"
   },
   "adonisjs": {
-    "instructions": "./build/instructions.md",
     "instructionsMd": "./build/instructions.md",
     "types": "adonis5-jwt",
     "providers": [
