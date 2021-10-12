@@ -26,7 +26,7 @@ declare module '@ioc:Adonis/Addons/Auth' {
     interface GuardsList {
         ...other guards...
 
-        //Add the following lines
+        //Add the following lines and change 'user' to whatever Provider you're using
         jwt: {
             implementation: JWTGuardContract<'user', 'jwt'>,
             config: JWTGuardConfig<'user'>,

@@ -12,7 +12,8 @@
     "test": "node japaFile.js",
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "clean": "del build",
-    "compile": "npm run lint && npm run clean && tsc",
+    "compile": "npm run lint && npm run clean && npm run copyfiles && tsc",
+    "copyfiles": "copyfiles \"instructions.md\" build",
     "build": "npm run compile",
     "prepublishOnly": "npm run build",
     "lint": "eslint . --ext=.ts",
@@ -33,9 +34,13 @@
     "jwt"
   ],
   "devDependencies": {
+    "@adonisjs/auth": "^8.0.9",
+    "@adonisjs/core": "^5.3.4",
+    "@adonisjs/lucid": "^16.2.1",
     "@adonisjs/mrm-preset": "^4.1.2",
     "@adonisjs/require-ts": "^2.0.8",
     "@types/node": "^16.10.3",
+    "copyfiles": "^2.4.1",
     "del-cli": "^4.0.1",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
@@ -55,25 +60,14 @@
     "build/index.js"
   ],
   "dependencies": {
-    "@adonisjs/auth": "^8.0.9",
-    "@adonisjs/core": "^5.3.4",
-    "@adonisjs/lucid": "^16.2.1",
     "jose": "^3.20.0"
   },
   "adonisjs": {
-    "types": "jwt-auth",
+    "instructionsMd": "./build/instructions.md",
+    "types": "adonis5-jwt",
     "providers": [
-      "jwt"
-    ],
-    "templates": {
-      "basePath": "./build/templates",
-      "config": [
-        {
-          "src": "config.txt",
-          "dest": "sentry"
-        }
-      ]
-    }
+      "adonis5-jwt"
+    ]
   },
   "np": {
     "contents": ".",
