@@ -1,6 +1,6 @@
 {
-  "name": "adonis-jwt",
-  "version": "1.0.0",
+  "name": "adonis5-jwt",
+  "version": "0.9.9",
   "description": "",
   "types": "build/adonis-typings/index.d.ts",
   "main": "build/index.js",
@@ -16,7 +16,9 @@
     "build": "npm run compile",
     "prepublishOnly": "npm run build",
     "lint": "eslint . --ext=.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "release": "np",
+    "version": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -41,6 +43,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "japa": "^3.1.1",
     "mrm": "^3.0.9",
+    "np": "^7.5.0",
     "prettier": "^2.4.1",
     "typescript": "^4.4.3"
   },
@@ -71,5 +74,9 @@
         }
       ]
     }
+  },
+  "np": {
+    "contents": ".",
+    "anyBranch": false
   }
 }
