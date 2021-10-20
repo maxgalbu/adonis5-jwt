@@ -3,7 +3,7 @@
 [![npm-image]][npm-url] [![license-image]][license-url] [![typescript-image]][typescript-url]
 
 Add JWT authentication to Adonisjs v5. 
-Thanks to @alex-oliveira for the starting implementation!
+Thanks to https://github.com/alex-oliveira for the starting implementation!
 
 ## Installation
 
