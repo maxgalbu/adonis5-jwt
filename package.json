@@ -21,12 +21,16 @@
     "release": "np",
     "version": "npm run build"
   },
-  "repository": {
-    "type": "git",
-    "url": "git"
-  },
   "author": "Max Galbusera",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maxgalbu/adonis5-jwt.git"
+  },
+  "homepage": "https://github.com/maxgalbu/adonis5-jwt#readme",
+  "bugs": {
+    "url": "https://github.com/maxgalbu/adonis5-jwt/issues"
+  },
   "keywords": [
     "adonis",
     "adonis-auth",
