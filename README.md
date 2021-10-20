@@ -83,7 +83,7 @@ await auth.use("jwt").generate(user, {
 ```
 
 [npm-image]: https://img.shields.io/npm/v/adonis5-jwt.svg?style=for-the-badge&logo=npm
-[npm-url]: https://npmjs.org/package/adonis-jwt "npm"
+[npm-url]: https://npmjs.org/package/adonis5-jwt "npm"
 
 [license-image]: https://img.shields.io/npm/l/adonis5-jwt?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md "license"
