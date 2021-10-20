@@ -13,7 +13,7 @@
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && npm run copyfiles && tsc",
-    "copyfiles": "copyfiles \"instructions.md\" build",
+    "copyfiles": "copyfiles \"./templates/**\" build",
     "build": "npm run compile",
     "prepublishOnly": "npm run build",
     "lint": "eslint . --ext=.ts",
@@ -39,9 +39,11 @@
     "@adonisjs/lucid": "^16.2.1",
     "@adonisjs/mrm-preset": "^4.1.2",
     "@adonisjs/require-ts": "^2.0.8",
+    "@adonisjs/sink": "^5.1.6",
     "@types/node": "^16.10.3",
     "copyfiles": "^2.4.1",
     "del-cli": "^4.0.1",
+    "editorconfig": "^0.15.3",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-adonis": "^1.3.3",
@@ -50,19 +52,21 @@
     "mrm": "^3.0.9",
     "np": "^7.5.0",
     "prettier": "^2.4.1",
+    "ts-morph": "^12.0.0",
     "typescript": "^4.4.3"
   },
   "files": [
     "build/adonis-typings",
     "build/providers",
     "build/lib",
-    "build/instructions.md"
+    "build/instructions.md",
+    "build/instructions.js"
   ],
   "dependencies": {
     "jose": "^3.20.0"
   },
   "adonisjs": {
-    "instructionsMd": "./build/instructions.md",
+    "instructions": "./build/instructions.js",
     "types": "adonis5-jwt",
     "providers": [
       "adonis5-jwt"

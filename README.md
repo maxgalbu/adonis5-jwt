@@ -6,12 +6,21 @@ Add JWT authentication to Adonisjs v5.
 
 ## Installation
 
-Install via `npm` or `yarn`:
+Make sure to install and configure `@adonisjs/auth` and `@adonisjs/lucid` beforehand, by running the following commands:
+
+```js
+npm install @adonisjs/auth @adonisjs/lucid 
+//Or, with yarn: yarn add @adonisjs/auth @adonisjs/lucid
+
+node ace configure @adonisjs/auth
+node ace configure @adonisjs/lucid
+```
+
+Install `adonis5-jwt` via `npm` or `yarn`:
 
 ```js
 npm install adonis5-jwt
-//Or if you use yarn
-yarn add adonis5-jwt
+//Or, with yarn: yarn add adonis5-jwt
 ```
 
 After the package has been installed, you have to configure it by running a command:
@@ -20,26 +29,7 @@ After the package has been installed, you have to configure it by running a comm
 node ace configure adonis5-jwt
 ```
 
-Then, edit `contracts/auth.ts` like this:
-
-```ts
-//Add the following line
-import { JWTGuardConfig, JWTGuardContract } from "@ioc:Adonisjs/Addons/Jwt";
-
-declare module '@ioc:Adonis/Addons/Auth' {
-    ...
-
-    interface GuardsList {
-        ...other guards...
-
-        //Add the following lines and change 'user' to whatever Provider you're using
-        jwt: {
-            implementation: JWTGuardContract<'user', 'jwt'>,
-            config: JWTGuardConfig<'user'>,
-        }
-    }
-}
-```
+This will ask a few questions and modify adonisjs files accordingly.
 
 ## Usage
 
