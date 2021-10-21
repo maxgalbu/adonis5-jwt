@@ -56,18 +56,18 @@
     "mrm": "^3.0.9",
     "np": "^7.5.0",
     "prettier": "^2.4.1",
-    "ts-morph": "^12.0.0",
     "typescript": "^4.4.3"
   },
   "files": [
     "build/adonis-typings",
     "build/providers",
     "build/lib",
-    "build/instructions.md",
+    "build/templates",
     "build/instructions.js"
   ],
   "dependencies": {
-    "jose": "^3.20.0"
+    "jose": "^3.20.0",
+    "ts-morph": "^12.0.0"
   },
   "adonisjs": {
     "instructions": "./build/instructions.js",
