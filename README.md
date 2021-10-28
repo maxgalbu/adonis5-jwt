@@ -42,7 +42,8 @@ Just make sure to prepend `.use("jwt")`:
 //authenticate() example
 Route.get('/dashboard', async ({ auth }) => {
     await auth.use("jwt").authenticate();
-    const userPayload = auth.use("jwt").user!;
+    const userModel = auth.use("jwt").user!;
+    const userPayloadFromJwt = auth.use("jwt").payload!;
 });
 
 //generate() example:
