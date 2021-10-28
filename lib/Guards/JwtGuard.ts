@@ -12,7 +12,7 @@ import { ProviderToken } from '@adonisjs/auth/build/src/Tokens/ProviderToken';
 import { SignJWT } from 'jose/jwt/sign';
 import { jwtVerify } from 'jose/jwt/verify';
 import JwtAuthenticationException from '../Exceptions/JwtAuthenticationException';
-import { JWTGuardConfig, JWTGuardContract, JWTLoginOptions, JWTTokenContract, JwtTokenProviderContract } from '@ioc:Adonis/Addons/Jwt';
+import { JWTGuardConfig, JWTGuardContract, JWTLoginOptions, JWTCustomPayload, JWTCustomPayloadData, JWTTokenContract, JwtTokenProviderContract } from '@ioc:Adonis/Addons/Jwt';
 
 /**
  * JWT token represents a persisted token generated for a given user.
@@ -146,22 +146,23 @@ export class JWTGuard extends BaseGuard<'jwt'> implements JWTGuardContract<any, 
         this.authenticationAttempted = true;
 
         /**
-         * Ensure the "Authorization" header value exists
+         * Ensure the "Authorization" header value exists, and it's a valid JWT
          */
         const token = this.getBearerToken();
-        const tokenValue = this.parsePublicToken(token);
+        const payload = await this.verifyToken(token);
 
         /**
          * Query token and user
          */
-        const providerToken = await this.getProviderToken(tokenValue);
-        const providerUser = await this.getUserById(providerToken.userId);
+        const providerToken = await this.getProviderToken(token);
+        const providerUser = await this.getUserById(payload.data!, providerToken.userId);
 
         /**
          * Marking user as logged in
          */
         this.markUserAsLoggedIn(providerUser.user, true);
         this.token = providerToken;
+        this.parsedToken = token;
 
         /**
          * Emit authenticate event. It can be used to track user logins.
@@ -391,33 +392,26 @@ export class JWTGuard extends BaseGuard<'jwt'> implements JWTGuardContract<any, 
     }
 
     /**
-     * Parses the token received in the request. The method also performs
-     * some initial level of sanity checks.
+     * Verify the token received in the request.
      */
-    private parsePublicToken(token: string): string {
-        const parts = token.split('.');
+    private async verifyToken(token: string): Promise<JWTCustomPayload> {
+        const secret = this.generateKey(this.config.privateKey);
 
-        /**
-         * Ensure the token has at least three parts
-         */
-        if (parts.length < 3) {
-            throw new JwtAuthenticationException("Invalid JWT format");
+        const { payload } = await jwtVerify(token, secret, {
+            issuer: this.config.issuer,
+            audience: this.config.audience,
+        });
+
+        const { data, exp }: JWTCustomPayload = payload;
+
+        if (!data) {
+            throw new JwtAuthenticationException("Invalid JWT payload");
+        }
+        if (exp && exp < Math.floor(DateTime.now().toSeconds())) {
+            throw new JwtAuthenticationException("Expired JWT token");
         }
 
-        /**
-         * Ensure 2nd part of the token has the expected length
-         */
-        const value = parts.join('.');
-        if (value.length < 30) {
-            throw new JwtAuthenticationException("Invalid JWT format: token too short");
-        }
-
-        /**
-         * Set parsed token
-         */
-        this.parsedToken = token;
-
-        return token;
+        return payload;
     }
 
     /**
@@ -440,33 +434,15 @@ export class JWTGuard extends BaseGuard<'jwt'> implements JWTGuardContract<any, 
     /**
      * Returns user from the user session id
      */
-    private async getUserById(id: string | number) {
-        const token = this.parsedToken || '';
-        const secret = this.generateKey(this.config.privateKey);
-
-        const { payload } = await jwtVerify(token, secret, {
-            issuer: this.config.issuer,
-            audience: this.config.audience,
-        });
-
-        const { data, exp }: any = payload;
-
-        if (exp && exp < Math.floor(DateTime.now().toSeconds())) {
-            throw new JwtAuthenticationException("Expired JWT token");
-        }
-
-        if (!data) {
-            throw new JwtAuthenticationException("Invalid JWT payload");
-        }
-
-        if (data.userId !== id) {
+    private async getUserById(payload: JWTCustomPayloadData, id: string | number) {
+        if (payload.userId !== id) {
             throw new JwtAuthenticationException("Invalid user in payload");
         }
 
-        const authenticatable = await this.provider.findById(data.userId);
+        const authenticatable = await this.provider.findById(payload.userId);
 
         if (!authenticatable.user) {
-            throw new JwtAuthenticationException("No user found from paypload");
+            throw new JwtAuthenticationException("No user found from payload");
         }
 
         return authenticatable;

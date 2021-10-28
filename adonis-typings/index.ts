@@ -10,6 +10,15 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         GuardContract,
     } from "@ioc:Adonis/Addons/Auth";
     import { DateTime } from "luxon";
+    import { JWTPayload } from "jose/jwt/verify";
+
+    export type JWTCustomPayloadData = {
+        [key: string]: any;
+    };
+
+    export type JWTCustomPayload = JWTPayload & {
+        data?: JWTCustomPayloadData;
+    };
 
     /**
      * Login options
@@ -17,6 +26,7 @@ declare module "@ioc:Adonis/Addons/Jwt" {
     export type JWTLoginOptions = {
         name?: string;
         expiresIn?: number | string;
+        payload?: JWTCustomPayloadData;
         [key: string]: any;
     };
 
