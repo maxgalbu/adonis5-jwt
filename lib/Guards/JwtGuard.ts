@@ -80,6 +80,11 @@ export class JWTGuard extends BaseGuard<'jwt'> implements JWTGuardContract<any, 
     public token?: ProviderTokenContract;
 
     /**
+     * The payload of the authenticated user
+     */
+    public payload?: JWTCustomPayloadData;
+
+    /**
      * Reference to the parsed token
      */
     private parsedToken?: string
@@ -163,6 +168,7 @@ export class JWTGuard extends BaseGuard<'jwt'> implements JWTGuardContract<any, 
         this.markUserAsLoggedIn(providerUser.user, true);
         this.token = providerToken;
         this.parsedToken = token;
+        this.payload = payload.data!;
 
         /**
          * Emit authenticate event. It can be used to track user logins.
@@ -251,6 +257,7 @@ export class JWTGuard extends BaseGuard<'jwt'> implements JWTGuardContract<any, 
          */
         this.markUserAsLoggedIn(providerUser.user);
         this.token = providerToken;
+        this.payload = payload.data;
 
         /**
          * Emit login event. It can be used to track user logins.

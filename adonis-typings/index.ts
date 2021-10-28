@@ -156,6 +156,7 @@ declare module "@ioc:Adonis/Addons/Jwt" {
     > extends GuardContract<Provider, Name> {
         token?: ProviderTokenContract;
         tokenProvider: JwtTokenProviderContract;
+        payload?: JWTCustomPayloadData;
 
         /**
          * Attempt to verify user credentials and perform login
