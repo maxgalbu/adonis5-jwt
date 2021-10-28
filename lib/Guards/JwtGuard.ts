@@ -11,7 +11,6 @@ import { createHash, createPrivateKey, KeyObject } from 'crypto';
 import { ProviderToken } from '@adonisjs/auth/build/src/Tokens/ProviderToken';
 import { SignJWT } from 'jose/jwt/sign';
 import { jwtVerify } from 'jose/jwt/verify';
-import { AuthenticationException } from '@adonisjs/auth/build/standalone';
 import JwtAuthenticationException from '../Exceptions/JwtAuthenticationException';
 import { JWTGuardConfig, JWTGuardContract, JWTLoginOptions, JWTTokenContract, JwtTokenProviderContract } from '@ioc:Adonis/Addons/Jwt';
 
@@ -122,7 +121,7 @@ export class JWTGuard extends BaseGuard<'jwt'> implements JWTGuardContract<any, 
             /**
              * Throw error when it is not an instance of the authentication
              */
-            if (!(error instanceof AuthenticationException)) {
+            if (!(error instanceof JwtAuthenticationException)) {
                 throw error;
             }
 
