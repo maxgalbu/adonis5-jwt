@@ -283,6 +283,7 @@ export class JWTGuard extends BaseGuard<'jwt'> implements JWTGuardContract<any, 
         }
 
         this.markUserAsLoggedOut();
+        this.payload = undefined;
     }
 
     /**
