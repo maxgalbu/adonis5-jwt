@@ -53,19 +53,27 @@ Just make sure to prepend `.use("jwt")`:
 
 ```ts
 //authenticate() example
-Route.get('/dashboard', async ({ auth }) => {
+Route.get('/dashboard', async ({ auth }:HttpContextContract) => {
     await auth.use("jwt").authenticate();
     const userModel = auth.use("jwt").user!;
     const userPayloadFromJwt = auth.use("jwt").payload!;
 });
 
 //generate() example:
-Route.get('/login', async ({ auth }) => {
+Route.get('/login', async ({ auth }:HttpContextContract) => {
     const user = await User.find(1);
     const jwt = await auth.use("jwt").generate(user);
+    //or using .login():
+    //const jwt = await auth.use("jwt").login(user);
 });
 
-Route.post('/logout', async ({ auth, response }) => {
+//refresh token usage example:
+Route.post('/refresh', async ({ auth, request }:HttpContextContract) => {
+    const refreshToken = request.input("refresh_token");
+    const jwt = await auth.use("jwt").loginViaRefreshToken(refreshToken);
+});
+
+Route.post('/logout', async ({ auth, response }:HttpContextContract) => {
   await auth.use('jwt').revoke()
   return {
     revoked: true
@@ -73,7 +81,7 @@ Route.post('/logout', async ({ auth, response }) => {
 })
 ```
 
-By default, `.generate()` uses a payload like the following:
+By default, `.generate()` or `.login()` uses a payload like the following:
 
 ```ts
 //user is a Lucid model
@@ -86,10 +94,21 @@ By default, `.generate()` uses a payload like the following:
 }
 ```
 
-If you want to generate a JWT with a different payload, simply specify `payload` when calling `.generate()`:
+If you want to generate a JWT with a different payload, simply specify `payload` when calling `.generate()` or `.login()`:
 
 ```ts
-await auth.use("jwt").generate(user, {
+await auth.use("jwt").login(user, {
+    payload: {
+        email: user.email,
+    },
+});
+```
+
+With the refresh token, you can obtain a new JWT using `loginViaRefreshToken()`:
+
+```ts
+const refreshToken = request.input("refresh_token");
+await auth.use("jwt").loginViaRefreshToken(refreshToken, {
     payload: {
         email: user.email,
     },
