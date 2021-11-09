@@ -26,15 +26,13 @@ declare module "@ioc:Adonis/Addons/Jwt" {
     export type JWTLoginOptions = {
         name?: string;
         expiresIn?: number | string;
+        refreshTokenExpiresIn?: number | string;
         payload?: JWTCustomPayloadData;
         [key: string]: any;
     };
 
-    export type DatabaseJWTTokenProviderConfig = DatabaseTokenProviderConfig & {
-        refreshTokenKey: string;
-    };
-    export type RedisJWTTokenProviderConfig = RedisTokenProviderConfig & {
-        refreshTokenKey: string;
+    export type JWTLogoutOptions = {
+        refreshToken: string;
     };
 
     /**
@@ -67,11 +65,25 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         privateKey: string;
 
         /**
+         * Whether this guard should store the JWT in the selected tokenProvider.
+         * If false, only the refresh token is stored.
+         */
+        persistJwt: boolean;
+
+        /**
+         * Default JWT expire in human-readable time format (eg. 10h, 5d, 2m)
+         */
+        jwtDefaultExpire: string;
+
+        /**
+         * Default refresh token expire in human-readable time format (eg. 10h, 5d, 2m)
+         */
+        refreshTokenDefaultExpire: string;
+
+        /**
          * Provider for managing tokens
          */
-        tokenProvider:
-        | DatabaseJWTTokenProviderConfig
-        | RedisJWTTokenProviderConfig;
+        tokenProvider: DatabaseTokenProviderConfig | RedisTokenProviderConfig;
 
         /**
          * User provider
@@ -140,22 +152,27 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         };
     }
 
-    export interface JwtTokenProviderContract extends TokenProviderContract {
-        /**
-         * Delete token using the lookup id or the token value
-         */
+    export interface JwtProviderContract extends TokenProviderContract {
         destroyWithHash(token: string, type: string): Promise<void>;
+        readRefreshToken(userRefreshToken: string, tokenType: string): Promise<ProviderTokenContract | null>;
+        destroyRefreshToken(userRefreshToken: string, tokenType: string): Promise<void>;
+    }
+
+    export interface RefreshTokenProviderContract extends TokenProviderContract {
+        destroyWithHash(token: string, type: string): Promise<void>;
+    }
+
+    export interface JwtProviderTokenContract extends ProviderTokenContract {
+        refreshToken: string;
+        refreshTokenExpiresAt: DateTime;
     }
 
     /**
      * Shape of the JWT guard
      */
-    export interface JWTGuardContract<
-        Provider extends keyof ProvidersList,
-        Name extends keyof GuardsList
-    > extends GuardContract<Provider, Name> {
-        token?: ProviderTokenContract;
-        tokenProvider: JwtTokenProviderContract;
+    export interface JWTGuardContract<Provider extends keyof ProvidersList, Name extends keyof GuardsList>
+        extends GuardContract<Provider, Name> {
+        tokenProvider: JwtProviderContract | RefreshTokenProviderContract;
         payload?: JWTCustomPayloadData;
 
         /**
@@ -176,6 +193,14 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         ): Promise<JWTTokenContract<GetProviderRealUser<Provider>>>;
 
         /**
+         * Login a user using refresh token
+         */
+        loginViaRefreshToken(
+            refreshToken: string,
+            options?: JWTLoginOptions
+        ): Promise<JWTTokenContract<GetProviderRealUser<Provider>>>;
+
+        /**
          * Generate token for a user without any verification
          */
         generate(
@@ -186,7 +211,12 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         /**
          * Alias for logout
          */
-        revoke(): Promise<void>;
+        logout(options?: JWTLogoutOptions): Promise<void>;
+
+        /**
+         * Alias for logout
+         */
+        revoke(options?: JWTLogoutOptions): Promise<void>;
 
         /**
          * Login a user using their id

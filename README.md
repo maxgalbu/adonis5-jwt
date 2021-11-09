@@ -24,13 +24,25 @@ npm install adonis5-jwt
 //Or, with yarn: yarn add adonis5-jwt
 ```
 
+## Configure package
+
 After the package has been installed, you have to configure it by running a command:
 
 ```js
 node ace configure adonis5-jwt
 ```
 
-This will ask a few questions and modify adonisjs files accordingly.
+This will ask a few questions and modify adonisjs files accordingly. 
+
+During this configure, you will have to choose whether you want to store JWT in database or not.
+The two solutions have advantages and disadvantages. Bear in mind that the default is NOT to store JWT in db, which is the recommended solution.
+
+| Command | JWT in db | JWT not in db |
+| --- | --- |
+| refresh token stored in DB | :white_check_mark: | :white_check_mark: |
+| full control on JWT expiration/revocation | :white_check_mark: | :x: |
+| faster login that doesn't use DB | :x: | :white_check_mark: |
+| logout needs refresh token | :x: | :white_check_mark: |
 
 ## Usage
 

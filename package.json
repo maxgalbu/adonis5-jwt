@@ -42,6 +42,7 @@
     "@adonisjs/core": "^5.3.4",
     "@adonisjs/lucid": "^16.2.1",
     "@adonisjs/mrm-preset": "^4.1.2",
+    "@adonisjs/redis": "^7.0.9",
     "@adonisjs/require-ts": "^2.0.8",
     "@adonisjs/sink": "^5.1.6",
     "@types/node": "^16.10.3",
@@ -54,6 +55,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "japa": "^3.1.1",
     "mrm": "^3.0.9",
+    "ms": "^2.1.2",
     "np": "^7.5.0",
     "prettier": "^2.4.1",
     "typescript": "^4.4.3"
@@ -67,7 +69,8 @@
   ],
   "dependencies": {
     "jose": "^3.20.0",
-    "ts-morph": "^12.0.0"
+    "ts-morph": "^12.0.0",
+    "uuid": "^8.3.2"
   },
   "adonisjs": {
     "instructions": "./build/instructions.js",

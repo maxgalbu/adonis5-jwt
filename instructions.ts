@@ -1,12 +1,24 @@
 import { join } from "path";
+import ms from "ms";
 import { generateKeyPair } from "crypto";
 import * as sinkStatic from "@adonisjs/sink";
 import { string } from "@poppinss/utils/build/helpers";
 import { ApplicationContract } from "@ioc:Adonis/Core/Application";
-import { IndentationText, NewLineKind, Project, PropertyAssignment, SyntaxKind, Writers } from "ts-morph";
+import {
+    IndentationText,
+    NewLineKind,
+    Project,
+    PropertyAssignment,
+    SyntaxKind,
+    Writers,
+} from "ts-morph";
 import { parse as parseEditorConfig } from "editorconfig";
 
 type InstructionsState = {
+    persistJwt: boolean;
+    jwtDefaultExpire: string;
+    refreshTokenDefaultExpire: string;
+
     usersTableName?: string;
     usersModelName?: string;
     usersModelNamespace?: string;
@@ -22,10 +34,10 @@ type InstructionsState = {
 
 type DefinedProviders = {
     [name: string]: {
-        type: "lucid" | "database",
-        model?: string,
-    }
-}
+        type: "lucid" | "database";
+        model?: string;
+    };
+};
 
 /**
  * Prompt choices for the tokens provider selection
@@ -55,7 +67,7 @@ function getStub(...relativePaths: string[]) {
  *
  * @returns
  */
-async function getIntendationConfigForTsMorph(projectRoot :string) {
+async function getIntendationConfigForTsMorph(projectRoot: string) {
     const indentConfig = await parseEditorConfig(projectRoot + "/.editorconfig");
 
     let indentationText;
@@ -101,7 +113,12 @@ function makeTokensMigration(
     const migrationsDirectory = app.directoriesMap.get("migrations") || "database";
     const migrationPath = join(migrationsDirectory, `${Date.now()}_${state.tokensTableName}.ts`);
 
-    const template = new sink.files.MustacheFile(projectRoot, migrationPath, getStub("migrations/jwt_tokens.txt"));
+    let templateFile = "migrations/jwt_tokens.txt";
+    if (!state.persistJwt) {
+        templateFile = "migrations/jwt_refresh_tokens.txt";
+    }
+
+    const template = new sink.files.MustacheFile(projectRoot, migrationPath, getStub(templateFile));
     if (template.exists()) {
         sink.logger.action("create").skipped(`${migrationPath} file already exists`);
         return;
@@ -128,7 +145,7 @@ async function getDefinedProviders(projectRoot: string, app: ApplicationContract
     //Doesn't work without single quotes wrapping the module name
     const authModule = authContractFile?.getModuleOrThrow("'@ioc:Adonis/Addons/Auth'");
 
-    const definedProviders :DefinedProviders = {};
+    const definedProviders: DefinedProviders = {};
 
     const providersInterface = authModule.getInterfaceOrThrow("ProvidersList");
     const userProviders = providersInterface.getProperties();
@@ -163,7 +180,9 @@ async function getDefinedProviders(projectRoot: string, app: ApplicationContract
     }
 
     if (!Object.keys(definedProviders).length) {
-        throw new Error("No provider implementation found in ProvidersList. Maybe you didn't configure @adonisjs/auth first?");
+        throw new Error(
+            "No provider implementation found in ProvidersList. Maybe you didn't configure @adonisjs/auth first?"
+        );
     }
 
     return definedProviders;
@@ -270,7 +289,6 @@ async function editConfig(
             driver: "'database'",
             table: "'jwt_tokens'",
             foreignKey: "'user_id'",
-            refreshTokenKey: "'refresh_token'",
         });
     }
 
@@ -290,7 +308,7 @@ async function editConfig(
             model: `() => import('${state.usersModelNamespace}')`,
         });
     } else {
-        throw new Error(`Invalid state.provider: ${state.provider}`)
+        throw new Error(`Invalid state.provider: ${state.provider}`);
     }
 
     //Instantiate ts-morph
@@ -322,6 +340,9 @@ async function editConfig(
             driver: '"jwt"',
             publicKey: `Env.get('JWT_PUBLIC_KEY', '').replace(/\\\\n/g, '\\n')`,
             privateKey: `Env.get('JWT_PRIVATE_KEY', '').replace(/\\\\n/g, '\\n')`,
+            persistJwt: `${state.persistJwt ? "true" : "false"}`,
+            jwtDefaultExpire: `'${state.jwtDefaultExpire}'`,
+            refreshTokenDefaultExpire: `'${state.refreshTokenDefaultExpire}'`,
             tokenProvider: tokenProvider,
             provider: provider,
         }),
@@ -373,7 +394,10 @@ async function makeKeys(
 /**
  * Prompts user to select the provider
  */
-async function getProvider(sink: typeof sinkStatic, definedProviders: DefinedProviders): Promise<"lucid" | "database" | string> {
+async function getProvider(
+    sink: typeof sinkStatic,
+    definedProviders: DefinedProviders
+): Promise<"lucid" | "database" | string> {
     let choices = {
         lucid: {
             name: "lucid",
@@ -388,10 +412,12 @@ async function getProvider(sink: typeof sinkStatic, definedProviders: DefinedPro
     };
 
     for (const providerName in definedProviders) {
-        const {type: definedProviderType} = definedProviders[providerName];
+        const { type: definedProviderType } = definedProviders[providerName];
         if (choices[definedProviderType]) {
             choices[definedProviderType].name = providerName;
-            choices[definedProviderType].message = `Already configured ${string.capitalCase(definedProviderType)} provider (${providerName})`;
+            choices[definedProviderType].message = `Already configured ${string.capitalCase(
+                definedProviderType
+            )} provider (${providerName})`;
         }
     }
 
@@ -445,9 +471,37 @@ async function getMigrationConsent(sink: typeof sinkStatic, tableName: string): 
 }
 
 function getModelNamespace(app: ApplicationContract, usersModelName) {
-    return `${app.namespacesMap.get("models") || "App/Models"}/${string.capitalCase(
-        usersModelName
-    )}`;
+    return `${app.namespacesMap.get("models") || "App/Models"}/${string.capitalCase(usersModelName)}`;
+}
+
+async function getPersistJwt(sink: typeof sinkStatic): Promise<boolean> {
+    return sink.getPrompt().confirm(`Do you want to persist JWT in database/redis (please read README.md beforehand)?`);
+}
+
+async function getJwtDefaultExpire(sink: typeof sinkStatic, state: InstructionsState): Promise<string> {
+    return sink.getPrompt().ask("Enter the default expire time for the JWT (10h = 10 hours, 5d = 5 days, etc)", {
+        default: state.jwtDefaultExpire,
+        validate(value) {
+            if (!value.match(/^[0-9]+[a-z]+$/)) {
+                return false;
+            }
+            return !!ms(value);
+        },
+    });
+}
+
+async function getRefreshTokenDefaultExpire(sink: typeof sinkStatic, state: InstructionsState): Promise<string> {
+    return sink
+        .getPrompt()
+        .ask("Enter the default expire time for the refresh token (10h = 10 hours, 5d = 5 days, etc)", {
+            default: state.refreshTokenDefaultExpire,
+            validate(value) {
+                if (!value.match(/^[0-9]+[a-z]+$/)) {
+                    return false;
+                }
+                return !!ms(value);
+            },
+        });
 }
 
 /**
@@ -455,6 +509,9 @@ function getModelNamespace(app: ApplicationContract, usersModelName) {
  */
 export default async function instructions(projectRoot: string, app: ApplicationContract, sink: typeof sinkStatic) {
     const state: InstructionsState = {
+        persistJwt: false,
+        jwtDefaultExpire: "10m",
+        refreshTokenDefaultExpire: "10d",
         tokensTableName: "jwt_tokens",
         tokensSchemaName: "JwtTokens",
         provider: "lucid",
@@ -497,11 +554,16 @@ export default async function instructions(projectRoot: string, app: Application
         }
     }
 
+    state.persistJwt = await getPersistJwt(sink);
+
     let tokensMigrationConsent = false;
     state.tokensProvider = await getTokensProvider(sink);
     if (state.tokensProvider === "database") {
         tokensMigrationConsent = await getMigrationConsent(sink, state.tokensTableName);
     }
+
+    state.jwtDefaultExpire = await getJwtDefaultExpire(sink, state);
+    state.refreshTokenDefaultExpire = await getRefreshTokenDefaultExpire(sink, state);
 
     await makeKeys(projectRoot, app, sink, state);
 

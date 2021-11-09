@@ -17,16 +17,30 @@ export default class JwtProvider {
     public async register() {
         const Event = this.app.container.resolveBinding('Adonis/Core/Event');
         const AuthManager = this.app.container.resolveBinding('Adonis/Addons/Auth');
-        const Database = this.app.container.use('Adonis/Lucid/Database');
-        const {default: JwtTokenDatabaseProvider} = await import('../lib/TokenProviders/JwtTokenDatabaseProvider');
+        const {default: JwtRedisProvider} = await import('../lib/TokenProviders/JwtRedisProvider');
+        const {default: JwtDatabaseProvider} = await import('../lib/TokenProviders/JwtDatabaseProvider');
+        const {default: RefreshTokenDatabaseProvider} = await import('../lib/TokenProviders/RefreshTokenDatabaseProvider');
 
         AuthManager.extend('guard', 'jwt', (_auth: typeof AuthManager, _mapping, config, provider, ctx) => {
-            //The defaultTokenDatabaseProvider expects token id to be prepended
+            //The default TokenDatabaseProvider expects token id to be prepended
             //to the JWT token which makes no sense, because then JWT becomes invalid.
             //Use a custom JwtTokenDatabaseProvider so that the JWT can be found in database using
             //the token itself and not an id.
             //const tokenProvider = auth.makeTokenProviderInstance(config.tokenProvider);
-            const tokenProvider = new JwtTokenDatabaseProvider(config.tokenProvider, Database);
+
+            let tokenProvider;
+            if (config.persistJwt && config.tokenProvider.driver === "database") {
+                const Database = this.app.container.use('Adonis/Lucid/Database');
+                tokenProvider = new JwtDatabaseProvider(config.tokenProvider, Database);
+            } else if (!config.persistJwt && config.tokenProvider.driver === "database") {
+                const Database = this.app.container.use('Adonis/Lucid/Database');
+                tokenProvider = new RefreshTokenDatabaseProvider(config.tokenProvider, Database);
+            } else if (config.tokenProvider.driver === "redis") {
+                const Redis = this.app.container.use('Adonis/Addons/Redis');
+                tokenProvider = new JwtRedisProvider(config.tokenProvider, Redis);
+            } else {
+                throw new Error(`Invalid tokenProvider driver: ${config.tokenProvider.driver}`)
+            }
 
             return new JWTGuard(_mapping, config, Event, provider, ctx, tokenProvider) as any;
         });
