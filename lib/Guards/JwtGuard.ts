@@ -214,6 +214,27 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
      * Login user using the provided refresh token
      */
     public async loginViaRefreshToken(refreshToken: string, options?: JWTLoginOptions) {
+        const user = this.getUserFromRefreshToken(refreshToken);
+
+        /**
+         * Invalidate old refresh token immediately
+         */
+        if (this.config.persistJwt) {
+            await (this.tokenProvider as JwtProviderContract).destroyRefreshToken(
+                refreshToken,
+                this.tokenTypes.refreshToken
+            );
+        } else {
+            await (this.tokenProvider as RefreshTokenProviderContract).destroyWithHash(refreshToken, this.tokenType);
+        }
+
+        return this.login(user, options);
+    }
+
+    /**
+     * Get user related to provided refresh token
+     */
+    public async getUserFromRefreshToken(refreshToken: string) {
         let providerToken;
         if (this.config.persistJwt) {
             providerToken = await (this.tokenProvider as JwtProviderContract).readRefreshToken(
@@ -228,17 +249,8 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
             throw new JwtAuthenticationException("Invalid refresh token");
         }
 
-        /**
-         * Invalidate old refresh token immediately
-         */
-        if (this.config.persistJwt) {
-            await (this.tokenProvider as JwtProviderContract).destroyRefreshToken(refreshToken, this.tokenType);
-        } else {
-            await (this.tokenProvider as RefreshTokenProviderContract).destroyWithHash(refreshToken, this.tokenType);
-        }
-
         const providerUser = await this.findById(providerToken.userId);
-        return this.login(providerUser.user, options);
+        return providerUser.user;
     }
 
     /**

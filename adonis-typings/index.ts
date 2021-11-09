@@ -225,5 +225,7 @@ declare module "@ioc:Adonis/Addons/Jwt" {
             id: string | number,
             options?: JWTLoginOptions
         ): Promise<JWTTokenContract<GetProviderRealUser<Provider>>>;
+
+        getUserFromRefreshToken(refreshToken: string): Promise<GetProviderRealUser<Provider>>;
     }
 }
