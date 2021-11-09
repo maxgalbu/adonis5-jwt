@@ -35,14 +35,15 @@ node ace configure adonis5-jwt
 This will ask a few questions and modify adonisjs files accordingly. 
 
 During this configure, you will have to choose whether you want to store JWT in database or not.
-The two solutions have advantages and disadvantages. Bear in mind that the default is NOT to store JWT in db, which is the recommended solution.
+The two solutions have advantages and disadvantages. Bear in mind that the default is NOT to store JWT in db.
 
 | Command | JWT in db | JWT not in db |
-| --- | --- |
+| --- | --- | --- |
+| recommended solution | :x: | :white_check_mark: |
 | refresh token stored in DB | :white_check_mark: | :white_check_mark: |
 | full control on JWT expiration/revocation | :white_check_mark: | :x: |
 | faster login that doesn't use DB | :x: | :white_check_mark: |
-| logout needs refresh token | :x: | :white_check_mark: |
+| logout doesn't need refresh token | :white_check_mark: | :x: |
 
 ## Usage
 
