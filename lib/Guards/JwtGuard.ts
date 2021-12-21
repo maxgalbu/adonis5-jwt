@@ -215,7 +215,7 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
      * Login user using the provided refresh token
      */
     public async loginViaRefreshToken(refreshToken: string, options?: JWTLoginOptions) {
-        const user = this.getUserFromRefreshToken(refreshToken);
+        const user = await this.getUserFromRefreshToken(refreshToken);
 
         /**
          * Invalidate old refresh token immediately
