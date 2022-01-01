@@ -121,7 +121,7 @@ export default class JwtDatabaseProvider extends AbstractDatabaseProvider implem
             token: token.tokenHash,
             type: token.type,
             refresh_token: token.refreshToken,
-            refresh_token_expires_at: token.refreshTokenExpiresAt,
+            refresh_token_expires_at: token.refreshTokenExpiresAt?.toFormat(client.dialect.dateTimeFormat),
             expires_at: token.expiresAt ? token.expiresAt.toFormat(client.dialect.dateTimeFormat) : null,
             created_at: DateTime.local().toFormat(client.dialect.dateTimeFormat),
             ...token.meta,
