@@ -465,7 +465,11 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
      */
     private getBearerToken(): string {
         if(this.config.getBearerToken) {
-            return this.config.getBearerToken(this.ctx);
+           try {
+               return  this.config.getBearerToken(this.ctx);
+           } catch (error) {
+            throw new JwtAuthenticationException(error);
+           }
         }
         /**
          * Ensure the "Authorization" header value exists
