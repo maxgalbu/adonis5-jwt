@@ -70,20 +70,24 @@ function getStub(...relativePaths: string[]) {
 async function getIntendationConfigForTsMorph(projectRoot: string) {
     const indentConfig = await parseEditorConfig(projectRoot + "/.editorconfig");
 
-    let indentationText;
+    let indentationText:IndentationText;
     if (indentConfig.indent_style === "space" && indentConfig.indent_size === 2) {
         indentationText = IndentationText.TwoSpaces;
     } else if (indentConfig.indent_style === "space" && indentConfig.indent_size === 4) {
         indentationText = IndentationText.FourSpaces;
     } else if (indentConfig.indent_style === "tab") {
         indentationText = IndentationText.Tab;
+    } else {
+        indentationText = IndentationText.FourSpaces;
     }
 
-    let newLineKind;
+    let newLineKind:NewLineKind;
     if (indentConfig.end_of_line === "lf") {
         newLineKind = NewLineKind.LineFeed;
     } else if (indentConfig.end_of_line === "crlf") {
         newLineKind = NewLineKind.CarriageReturnLineFeed;
+    } else {
+        newLineKind = NewLineKind.LineFeed;
     }
 
     return { indentationText, newLineKind };
