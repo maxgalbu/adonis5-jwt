@@ -19,6 +19,7 @@ export default class JwtProvider {
         const AuthManager = this.app.container.resolveBinding('Adonis/Addons/Auth');
         const {default: JwtRedisProvider} = await import('../lib/TokenProviders/JwtRedisProvider');
         const {default: JwtDatabaseProvider} = await import('../lib/TokenProviders/JwtDatabaseProvider');
+        const {default: JwtMongoProvider} = await import('../lib/TokenProviders/JwtMongoProvider');
         const {default: RefreshTokenDatabaseProvider} = await import('../lib/TokenProviders/RefreshTokenDatabaseProvider');
 
         AuthManager.extend('guard', 'jwt', (_auth: typeof AuthManager, _mapping, config, provider, ctx) => {
@@ -38,6 +39,9 @@ export default class JwtProvider {
             } else if (config.tokenProvider.driver === "redis") {
                 const Redis = this.app.container.use('Adonis/Addons/Redis');
                 tokenProvider = new JwtRedisProvider(config.tokenProvider, Redis);
+            } else if (config.persistJwt && config.tokenProvider.driver === "mongo") {
+                const Database = this.app.container.use('Adonis/Lucid/Database');
+                tokenProvider = new JwtMongoProvider(config.tokenProvider, Database);
             } else {
                 throw new Error(`Invalid tokenProvider driver: ${config.tokenProvider.driver}`)
             }

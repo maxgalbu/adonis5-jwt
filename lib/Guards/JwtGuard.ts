@@ -463,7 +463,7 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
     /**
      * Returns the bearer token
      */
-    private getBearerToken(): string {
+    public getBearerToken(): string {
         /**
          * Ensure the "Authorization" header value exists
          */
@@ -487,7 +487,7 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
     /**
      * Verify the token received in the request.
      */
-    private async verifyToken(token: string): Promise<JWTCustomPayload> {
+    public async verifyToken(token: string): Promise<JWTCustomPayload> {
         const secret = this.generateKey(this.config.privateKey);
 
         const { payload } = await jwtVerify(token, secret, {
