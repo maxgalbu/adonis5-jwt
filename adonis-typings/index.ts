@@ -1,5 +1,5 @@
 declare module "@ioc:Adonis/Addons/Jwt" {
-    import mongoose from "mongoose";
+    // import mongoose from "mongoose";
     import {
         DatabaseTokenProviderConfig,
         RedisTokenProviderConfig,
@@ -13,9 +13,21 @@ declare module "@ioc:Adonis/Addons/Jwt" {
     import { DateTime } from "luxon";
     import { JWTPayload } from "jose/jwt/verify";
 
+    // export type MongoTokenProviderConfig = {
+    //     driver: 'mongo';
+    //     model: typeof mongoose.Model;
+    //     foreignKey?: string;
+    //     connection?: string;
+    //     type?: string;
+    // }
     export type MongoTokenProviderConfig = {
         driver: 'mongo';
-        model: typeof mongoose.Model;
+        model: {
+            find: Function,
+            findOne: Function,
+            deleteOne: Function,
+            create: Function,
+        };
         foreignKey?: string;
         connection?: string;
         type?: string;
