@@ -20,6 +20,7 @@ export default class JwtProvider {
         const {default: JwtRedisProvider} = await import('../lib/TokenProviders/JwtRedisProvider');
         const {default: JwtDatabaseProvider} = await import('../lib/TokenProviders/JwtDatabaseProvider');
         const {default: RefreshTokenDatabaseProvider} = await import('../lib/TokenProviders/RefreshTokenDatabaseProvider');
+        const {default: RefreshTokenRedisProvider} = await import('../lib/TokenProviders/RefreshTokenRedisProvider');
 
         AuthManager.extend('guard', 'jwt', (_auth: typeof AuthManager, _mapping, config, provider, ctx) => {
             //The default TokenDatabaseProvider expects token id to be prepended
@@ -35,9 +36,12 @@ export default class JwtProvider {
             } else if (!config.persistJwt && config.tokenProvider.driver === "database") {
                 const Database = this.app.container.use('Adonis/Lucid/Database');
                 tokenProvider = new RefreshTokenDatabaseProvider(config.tokenProvider, Database);
-            } else if (config.tokenProvider.driver === "redis") {
+            } else if (config.persistJwt && config.tokenProvider.driver === "redis") {
                 const Redis = this.app.container.use('Adonis/Addons/Redis');
                 tokenProvider = new JwtRedisProvider(config.tokenProvider, Redis);
+            } else if (!config.persistJwt && config.tokenProvider.driver === "redis") {
+                const Redis = this.app.container.use('Adonis/Addons/Redis');
+                tokenProvider = new RefreshTokenRedisProvider(config.tokenProvider, Redis);
             } else {
                 throw new Error(`Invalid tokenProvider driver: ${config.tokenProvider.driver}`)
             }
