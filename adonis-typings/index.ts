@@ -1,6 +1,5 @@
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
-
 declare module "@ioc:Adonis/Addons/Jwt" {
+    import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
     import {
         DatabaseTokenProviderConfig,
         RedisTokenProviderConfig,
