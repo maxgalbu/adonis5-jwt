@@ -1,5 +1,5 @@
 declare module "@ioc:Adonis/Addons/Jwt" {
-    import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+    import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
     import {
         DatabaseTokenProviderConfig,
         RedisTokenProviderConfig,
@@ -11,7 +11,7 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         GuardContract,
     } from "@ioc:Adonis/Addons/Auth";
     import { DateTime } from "luxon";
-    import { JWTPayload } from "jose/jwt/verify";
+    import { JWTPayload } from "jose";
 
     export type JWTCustomPayloadData = {
         [key: string]: any;
@@ -94,7 +94,7 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         /**
          * Default JWT uses the ctx.request.header("Authorization")
          */
-        getBearerToken?: (ctx: HttpContextContract) => string
+        getBearerToken?: (ctx: HttpContextContract) => string;
     };
 
     /**
