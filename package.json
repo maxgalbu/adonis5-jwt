@@ -65,7 +65,8 @@
     "build/providers",
     "build/lib",
     "build/templates",
-    "build/instructions.js"
+    "build/instructions.js",
+    "build/commands"
   ],
   "dependencies": {
     "jose": "^4.11.0",
@@ -77,6 +78,9 @@
     "types": "adonis5-jwt",
     "providers": [
       "adonis5-jwt"
+    ],
+    "commands": [
+      "adonis5-jwt/build/commands"
     ]
   },
   "np": {
