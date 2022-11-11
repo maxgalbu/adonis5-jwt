@@ -1,7 +1,6 @@
 import { DateTime } from "luxon";
-import { SignJWT } from "jose/jwt/sign";
-import { jwtVerify } from "jose/jwt/verify";
-import { JWTExpired } from "jose/util/errors";
+import { SignJWT, jwtVerify } from "jose";
+import { errors as JWTErrors } from "jose";
 import { v4 as uuidv4 } from "uuid";
 import { GetProviderRealUser, ProviderTokenContract, UserProviderContract } from "@ioc:Adonis/Addons/Auth";
 import { BaseGuard } from "@adonisjs/auth/build/src/Guards/Base";
@@ -141,7 +140,7 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
             /**
              * Throw error when it is not an instance of the authentication
              */
-            if (!(error instanceof JwtAuthenticationException) && !(error instanceof JWTExpired)) {
+            if (!(error instanceof JwtAuthenticationException) && !(error instanceof JWTErrors.JWTExpired)) {
                 throw error;
             }
 
