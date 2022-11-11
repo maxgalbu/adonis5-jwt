@@ -95,6 +95,11 @@ declare module "@ioc:Adonis/Addons/Jwt" {
          * Default JWT uses the ctx.request.header("Authorization")
          */
         getBearerToken?: (ctx: HttpContextContract) => string;
+
+        /**
+         * Algorithm used to generate key pair
+         */
+        algorithm?: string;
     };
 
     /**

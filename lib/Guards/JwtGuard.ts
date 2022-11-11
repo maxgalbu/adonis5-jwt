@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT, jwtVerify, importPKCS8, importSPKI } from "jose";
 import { errors as JWTErrors } from "jose";
 import { v4 as uuidv4 } from "uuid";
 import { GetProviderRealUser, ProviderTokenContract, UserProviderContract } from "@ioc:Adonis/Addons/Auth";
@@ -23,6 +23,7 @@ import {
     JWTLogoutOptions,
 } from "@ioc:Adonis/Addons/Jwt";
 import { JwtProviderToken } from "../ProviderToken/JwtProviderToken";
+import { readFileSync } from "fs";
 
 /**
  * JWT token represents a persisted token generated for a given user.
@@ -390,6 +391,22 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
         };
     }
 
+    private async getPrivateKey() {
+        const key = this.config.privateKey;
+        if (key.startsWith("-----BEGIN PRIVATE KEY-----")) {
+            return this.generateKey(key);
+        }
+        return importPKCS8(readFileSync(key).toString(), this.config.algorithm || "RS256");
+    }
+
+    private async getPublicKey() {
+        const key = this.config.publicKey;
+        if (key.startsWith("-----BEGIN PUBLIC KEY-----")) {
+            return this.generateKey(key);
+        }
+        return importSPKI(readFileSync(key).toString(), this.config.algorithm || "RS256");
+    }
+
     /**
      * Generates a new access token + refresh token + hash's for the persistance.
      */
@@ -417,7 +434,7 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
             accessTokenBuilder = accessTokenBuilder.setExpirationTime(expiresIn);
         }
 
-        const accessToken = await accessTokenBuilder.sign(this.generateKey(this.config.privateKey));
+        const accessToken = await accessTokenBuilder.sign(await this.getPrivateKey());
         const accessTokenHash = this.generateHash(accessToken);
 
         const refreshToken = uuidv4();
@@ -495,9 +512,7 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
      * Verify the token received in the request.
      */
     private async verifyToken(token: string): Promise<JWTCustomPayload> {
-        const secret = this.generateKey(this.config.privateKey);
-
-        const { payload } = await jwtVerify(token, secret, {
+        const { payload } = await jwtVerify(token, await this.getPublicKey(), {
             issuer: this.config.issuer,
             audience: this.config.audience,
         });
