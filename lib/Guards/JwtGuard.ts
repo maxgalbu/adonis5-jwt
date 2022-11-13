@@ -260,7 +260,7 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
         /**
          * Normalize options with defaults
          */
-        let { expiresIn, refreshTokenExpiresIn, name, payload, ...meta } = Object.assign(
+        let { expiresIn, refreshTokenExpiresIn, name, payload, rememberMe, ...meta } = Object.assign(
             { name: "JWT Access Token" },
             options
         );
@@ -293,7 +293,7 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
         /**
          * Generate a JWT and refresh token
          */
-        const tokenInfo = await this.generateTokenForPersistance(expiresIn, refreshTokenExpiresIn, payload);
+        const tokenInfo = await this.generateTokenForPersistance(expiresIn, refreshTokenExpiresIn, payload, rememberMe);
 
         let providerToken;
         if (!this.config.persistJwt) {
@@ -396,8 +396,12 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
     private async generateTokenForPersistance(
         expiresIn?: string | number,
         refreshTokenExpiresIn?: string | number,
-        payload: any = {}
+        payload: any = {},
+        rememberMe: boolean = false
     ) {
+        if (rememberMe) {
+            refreshTokenExpiresIn = this.config.refreshTokenRememberExpire;
+        }
         if (!expiresIn) {
             expiresIn = this.config.jwtDefaultExpire;
         }

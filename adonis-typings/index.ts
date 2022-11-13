@@ -28,6 +28,7 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         name?: string;
         expiresIn?: number | string;
         refreshTokenExpiresIn?: number | string;
+        rememberMe?: boolean;
         payload?: JWTCustomPayloadData;
         [key: string]: any;
     };
@@ -80,6 +81,11 @@ declare module "@ioc:Adonis/Addons/Jwt" {
          * Default refresh token expire in human-readable time format (eg. 10h, 5d, 2m)
          */
         refreshTokenDefaultExpire: string;
+
+        /**
+         * Remember refresh token expire in human-readable time format (eg. 10h, 5d, 2m)
+         */
+        refreshTokenRememberExpire: string;
 
         /**
          * Provider for managing tokens
