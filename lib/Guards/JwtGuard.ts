@@ -399,14 +399,13 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
         payload: any = {},
         rememberMe: boolean = false
     ) {
-        if (rememberMe) {
-            refreshTokenExpiresIn = this.config.refreshTokenRememberExpire;
-        }
         if (!expiresIn) {
             expiresIn = this.config.jwtDefaultExpire;
         }
         if (!refreshTokenExpiresIn) {
-            refreshTokenExpiresIn = this.config.refreshTokenDefaultExpire;
+            refreshTokenExpiresIn = rememberMe
+                ? this.config.refreshTokenRememberExpire
+                : this.config.refreshTokenDefaultExpire;
         }
 
         let accessTokenBuilder = new SignJWT({ data: payload }).setProtectedHeader({ alg: "RS256" }).setIssuedAt();
@@ -426,6 +425,12 @@ export class JWTGuard extends BaseGuard<"jwt"> implements JWTGuardContract<any, 
 
         const refreshToken = uuidv4();
         const refreshTokenHash = this.generateHash(refreshToken);
+
+        if (rememberMe) {
+            this.ctx.response.cookie("refreshToken", refreshTokenHash, {
+                expires: this.getExpiresAtDate(refreshTokenExpiresIn)?.toJSDate(),
+            });
+        }
 
         return {
             accessToken,
