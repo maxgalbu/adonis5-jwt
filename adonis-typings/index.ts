@@ -1,5 +1,5 @@
 declare module "@ioc:Adonis/Addons/Jwt" {
-    import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+    import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
     import {
         DatabaseTokenProviderConfig,
         RedisTokenProviderConfig,
@@ -11,7 +11,7 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         GuardContract,
     } from "@ioc:Adonis/Addons/Auth";
     import { DateTime } from "luxon";
-    import { JWTPayload } from "jose/jwt/verify";
+    import { JWTPayload } from "jose";
 
     export type JWTCustomPayloadData = {
         [key: string]: any;
@@ -28,6 +28,7 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         name?: string;
         expiresIn?: number | string;
         refreshTokenExpiresIn?: number | string;
+        rememberMe?: boolean;
         payload?: JWTCustomPayloadData;
         [key: string]: any;
     };
@@ -82,6 +83,11 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         refreshTokenDefaultExpire: string;
 
         /**
+         * Remember refresh token expire in human-readable time format (eg. 10h, 5d, 2m)
+         */
+        refreshTokenRememberExpire: string;
+
+        /**
          * Provider for managing tokens
          */
         tokenProvider: DatabaseTokenProviderConfig | RedisTokenProviderConfig;
@@ -94,7 +100,7 @@ declare module "@ioc:Adonis/Addons/Jwt" {
         /**
          * Default JWT uses the ctx.request.header("Authorization")
          */
-        getBearerToken?: (ctx: HttpContextContract) => string
+        getBearerToken?: (ctx: HttpContextContract) => string;
     };
 
     /**

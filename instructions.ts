@@ -4,20 +4,14 @@ import { generateKeyPair } from "crypto";
 import * as sinkStatic from "@adonisjs/sink";
 import { string } from "@poppinss/utils/build/helpers";
 import { ApplicationContract } from "@ioc:Adonis/Core/Application";
-import {
-    IndentationText,
-    NewLineKind,
-    Project,
-    PropertyAssignment,
-    SyntaxKind,
-    Writers,
-} from "ts-morph";
+import { IndentationText, NewLineKind, Project, PropertyAssignment, SyntaxKind, Writers } from "ts-morph";
 import { parse as parseEditorConfig } from "editorconfig";
 
 type InstructionsState = {
     persistJwt: boolean;
     jwtDefaultExpire: string;
     refreshTokenDefaultExpire: string;
+    refreshTokenRememberExpire: string;
 
     usersTableName?: string;
     usersModelName?: string;
@@ -70,7 +64,7 @@ function getStub(...relativePaths: string[]) {
 async function getIntendationConfigForTsMorph(projectRoot: string) {
     const indentConfig = await parseEditorConfig(projectRoot + "/.editorconfig");
 
-    let indentationText:IndentationText;
+    let indentationText: IndentationText;
     if (indentConfig.indent_style === "space" && indentConfig.indent_size === 2) {
         indentationText = IndentationText.TwoSpaces;
     } else if (indentConfig.indent_style === "space" && indentConfig.indent_size === 4) {
@@ -81,7 +75,7 @@ async function getIntendationConfigForTsMorph(projectRoot: string) {
         indentationText = IndentationText.FourSpaces;
     }
 
-    let newLineKind:NewLineKind;
+    let newLineKind: NewLineKind;
     if (indentConfig.end_of_line === "lf") {
         newLineKind = NewLineKind.LineFeed;
     } else if (indentConfig.end_of_line === "crlf") {
@@ -347,6 +341,7 @@ async function editConfig(
             persistJwt: `${state.persistJwt ? "true" : "false"}`,
             jwtDefaultExpire: `'${state.jwtDefaultExpire}'`,
             refreshTokenDefaultExpire: `'${state.refreshTokenDefaultExpire}'`,
+            refreshTokenRememberExpire: `'${state.refreshTokenRememberExpire}'`,
             tokenProvider: tokenProvider,
             provider: provider,
         }),
@@ -508,6 +503,20 @@ async function getRefreshTokenDefaultExpire(sink: typeof sinkStatic, state: Inst
         });
 }
 
+async function getRefreshTokenRememberExpire(sink: typeof sinkStatic, state: InstructionsState): Promise<string> {
+    return sink
+        .getPrompt()
+        .ask("Enter the remember expire time for the refresh token (10h = 10 hours, 5d = 5 days, etc)", {
+            default: state.refreshTokenRememberExpire,
+            validate(value) {
+                if (!value.match(/^[0-9]+[a-z]+$/)) {
+                    return false;
+                }
+                return !!ms(value);
+            },
+        });
+}
+
 /**
  * Instructions to be executed when setting up the package.
  */
@@ -515,7 +524,8 @@ export default async function instructions(projectRoot: string, app: Application
     const state: InstructionsState = {
         persistJwt: false,
         jwtDefaultExpire: "10m",
-        refreshTokenDefaultExpire: "10d",
+        refreshTokenDefaultExpire: "3h",
+        refreshTokenRememberExpire: "10d",
         tokensTableName: "jwt_tokens",
         tokensSchemaName: "JwtTokens",
         provider: "lucid",
@@ -568,6 +578,7 @@ export default async function instructions(projectRoot: string, app: Application
 
     state.jwtDefaultExpire = await getJwtDefaultExpire(sink, state);
     state.refreshTokenDefaultExpire = await getRefreshTokenDefaultExpire(sink, state);
+    state.refreshTokenRememberExpire = await getRefreshTokenRememberExpire(sink, state);
 
     await makeKeys(projectRoot, app, sink, state);
 
